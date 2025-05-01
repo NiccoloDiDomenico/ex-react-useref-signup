@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import './App.css'
 
 const letters = "abcdefghijklmnopqrstuvwxyz";
@@ -6,11 +6,11 @@ const numbers = "0123456789";
 const symbols = "!@#$%^&*()-_=+[]{}|;:'\\,.<>?/`~";
 
 function App() {
-  const [name, setName] = useState("");
+  const fullNameRef = useRef();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [specialization, setSpecialization] = useState("");
-  const [expYears, setExpYears] = useState("");
+  const specializationRef = useRef();
+  const expYearsRef = useRef();
   const [description, setDescription] = useState("");
   const [errors, setErrors] = useState({});
 
@@ -46,8 +46,8 @@ function App() {
     }
 
     // Description validation
-    if (description.trim().length < 100 || description.trim().length > 1000) {
-      realTimeErrors.description = "La descrizione deve contenere tra 100 e 1000 caratteri";
+    if (description.trim().length < 10 || description.trim().length > 100) {
+      realTimeErrors.description = "La descrizione deve contenere tra 10 e 100 caratteri";
     } else if (description !== description.trim()) {
       realTimeErrors.description = "La descrizione non può iniziare o finire con degli spazi";
     }
@@ -62,16 +62,15 @@ function App() {
       noSpecialization: false
     };
 
-    if (!name.trim() || !username.trim() || !password.trim() ||
-      !specialization.trim() || !description.trim()) {
+    if (!fullNameRef.current.value.trim() || !username.trim() || !password.trim() || !description.trim()) {
       newErrors.emptyFields = true;
     }
 
-    if (parseInt(expYears) <= 0) {
+    if (parseInt(expYearsRef.current.value) <= 0) {
       newErrors.invalidExpYears = true;
     }
 
-    if (specialization === "") {
+    if (specializationRef.current.value === "") {
       newErrors.noSpecialization = true;
     }
 
@@ -89,11 +88,11 @@ function App() {
     if (isFormValid) {
       console.log(`
         Dati form:
-        name: ${name},
+        name: ${fullNameRef.current.value},
         username: ${username},
         password: ${password},
-        specialization: ${specialization},
-        expYears: ${expYears},
+        specialization: ${specializationRef.current.value},
+        expYears: ${expYearsRef.current.value},
         description: ${description}
       `);
     } else {
@@ -109,12 +108,11 @@ function App() {
         <p>Compila i seguenti campi per effettuare la registrazione!</p>
         <form action="" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="name">Inserisci il tuo nome completo</label>
+            <label htmlFor="fullName">Inserisci il tuo nome completo</label>
             <input
-              id='name'
+              id='fullName'
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              ref={fullNameRef}
             />
           </div>
           <div>
@@ -149,8 +147,7 @@ function App() {
             <label htmlFor="specialization">Scegli la tua specializzazione</label>
             <select
               id="specialization"
-              value={specialization}
-              onChange={(e) => setSpecialization(e.target.value)}
+              ref={specializationRef}
             >
               <option value=""></option>
               <option value="Full Stack">Full Stack</option>
@@ -163,8 +160,7 @@ function App() {
             <input
               id='expYears'
               type="number"
-              value={expYears}
-              onChange={(e) => setExpYears(e.target.value)}
+              ref={expYearsRef}
             />
           </div>
           <div>
