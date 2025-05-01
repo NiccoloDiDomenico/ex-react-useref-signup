@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import './App.css'
 
 const letters = "abcdefghijklmnopqrstuvwxyz";
@@ -13,49 +13,47 @@ function App() {
   const [expYears, setExpYears] = useState("");
   const [description, setDescription] = useState("");
   const [errors, setErrors] = useState({});
-  const [validationErrors, setValidationErrors] = useState({});
 
-  const realTimeValidateForm = () => {
-    const newValidationErrors = {
+
+  const validationErrors = useMemo(() => {
+    const realTimeErrors = {
       username: "",
       password: "",
       description: ""
-    }
+    };
 
-    // real time check for username
+    // Username validation
     if (username.length < 6) {
-      newValidationErrors.username = "Username deve contenere almeno 6 caratteri"
+      realTimeErrors.username = "Username deve contenere almeno 6 caratteri";
     } else {
       const hasSpaces = username.includes(' ');
       const hasSymbols = [...username].some(char => symbols.includes(char));
-
       if (hasSpaces || hasSymbols) {
-        newValidationErrors.username = "Username può contenere solo lettere e numeri";
+        realTimeErrors.username = "Username può contenere solo lettere e numeri";
       }
     }
 
-    // real time check for password
+    // Password validation
     if (password.length < 8) {
-      newValidationErrors.password = "La password deve contenere almeno 8 caratteri"
+      realTimeErrors.password = "La password deve contenere almeno 8 caratteri";
     } else {
       const hasLetter = [...password].some(char => letters.includes(char.toLowerCase()));
       const hasNumber = [...password].some(char => numbers.includes(char));
       const hasSymbol = [...password].some(char => symbols.includes(char));
-
       if (!hasLetter || !hasNumber || !hasSymbol) {
-        newValidationErrors.password = "La password deve contenere almeno una lettera, un numero e un simbolo";
+        realTimeErrors.password = "La password deve contenere almeno una lettera, un numero e un simbolo";
       }
     }
 
-    // real time check for description
-    if (description.trim().length < 10 || description.trim().length > 100) {
-      newValidationErrors.description = "La deescrizione deve contenere min 10 e max 100 caratteri"
+    // Description validation
+    if (description.trim().length < 100 || description.trim().length > 1000) {
+      realTimeErrors.description = "La descrizione deve contenere tra 100 e 1000 caratteri";
     } else if (description !== description.trim()) {
-      newValidationErrors.description = "La descrizione non può iniziare o finire con degli spazi"
+      realTimeErrors.description = "La descrizione non può iniziare o finire con degli spazi";
     }
 
-    setValidationErrors(newValidationErrors);
-  }
+    return realTimeErrors;
+  }, [username, password, description]);
 
   const validateForm = () => {
     const newErrors = {
@@ -125,10 +123,7 @@ function App() {
               id='username'
               type="text"
               value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                realTimeValidateForm();
-              }}
+              onChange={(e) => setUsername(e.target.value)}
             />
             {username && (
               <p className={validationErrors.username ? 'error' : 'success'}>
@@ -142,10 +137,7 @@ function App() {
               id='password'
               type="password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                realTimeValidateForm();
-              }}
+              onChange={(e) => setPassword(e.target.value)}
             />
             {password && (
               <p className={validationErrors.password ? 'error' : 'success'}>
@@ -180,10 +172,7 @@ function App() {
             <textarea
               id="description"
               value={description}
-              onChange={(e) => {
-                setDescription(e.target.value);
-                realTimeValidateForm();
-              }}
+              onChange={(e) => setDescription(e.target.value)}
             />
             <small> Caratteri: {description.trim().length}</small>
             {description && (
